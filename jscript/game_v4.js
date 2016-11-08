@@ -4,7 +4,16 @@ var createjs = this.createjs || {};
 ;(function(game){
 	game.PI2 = Math.PI*2;
 	game.canvas = document.getElementById('stage');
+	game.touchHandlerDom = document.getElementById('motionhandler');
+	game.touchHandlerBtn = game.touchHandlerDom.querySelector("button.MotionControler");
+	var	bt = game.touchHandlerBtn.getBoundingClientRect();
+	game.touchHandlerCenter = {
+		x: bt.left + bt.width/2,
+		y: bt.top + bt.height/2
+	}
+
 	game.utility.resizeCanvas();
+
 	game.setting = {
 		FPS: 40,
 
@@ -13,12 +22,13 @@ var createjs = this.createjs || {};
 
 		snakeRadius: 8,
 		snakeSpinLength: 0.175, 
-		initialSnakeVelocity: 0.2,  
+		snakeBodySpan: 16, 			// px
+		initialSnakeVelocity: 0.2, // px/ms  
 		initialSnakelength: 5,
 		pointsToGrow: 1,
 
-		playgroundWidth: 3000,
-		crumbsNum: 200,
+		playgroundWidth: 300,
+		crumbsNum: 1,
 		enemyNum: 10
 
 	}
@@ -28,16 +38,12 @@ var createjs = this.createjs || {};
 ;(function(game){
 	game.snake = function(coords, ground, length){
 		this._coords = coords;	
-		/*this._rotationHelper = {
-			angleToTurn: 0,
-			timeToChange: 0,
-		};*/
 		this._tail = [];
 		this._path = [];
 		this.storage = 0;
 		this.head = new game.sprite.snake_head();
 		this.ground = ground;
-
+		this.iddead = false;
 		
 		this.snakeLength = length || game.setting.initialSnakelength;
 		this.setVelocity(game.setting.initialSnakeVelocity);
@@ -45,7 +51,6 @@ var createjs = this.createjs || {};
 		this._direction = Math.random()*360;
 		this._toDirection = this._direction;
 		this._initBody();
-		this._update();
 	}
 	var counter = 0;
 	game.snake.prototype = {
@@ -68,39 +73,26 @@ var createjs = this.createjs || {};
 			this._coords.y += deltaY;
 
 
-			this._path.push({x:this._coords.x, y: this._coords.y});
+			this._path.push({x:this._coords.x, y: this._coords.y, delta: deltamS});
 			this._updateDirection(deltamS);
 			this._update();
 			this.eatCrumbs();
-			var temp = Math.round(this.snakeCacheLength/64*this.fps);
-			//console.log(this.snakeCacheLength);
-			if(this._path.length > temp){
-				this._path.shift();
-			}
 		},
 		turnTo: function(degree){
 			this._toDirection = degree;
 			var span = degree - this._direction;
-			if(span <= -180 || span >= 180){
+			if(span < -180 || span >= 180){
 				this.clockwise = (span> 0?-1:1);
 				this.anglespan = 360 - Math.abs(span);
 			}
-			if(span > -180 && span < 180){
+			if(span >= -180 && span < 180){
 				this.clockwise = (span> 0?1:-1);
 				this.anglespan = Math.abs(span);
 			}
 
 		},
 		setVelocity: function(velocity){
-			/*
-				计算关系：
-				每一个蛇身间隔的cache序号 = 1/蛇的速度
-				蛇头位置cache所需的总长度 = 蛇身长度 * 蛇身间隔的cache序号
-				蛇的转动时间 = 转动长度 / 蛇的速度
-			*/
-			this.velocity = velocity || this.velocity;
-			this.snakeBodySpan = 1/this.velocity;
-			this.snakeCacheLength = this.snakeLength * this.snakeBodySpan;
+			this.velocity = velocity;
 			this.snakeSpinTime = game.setting.snakeSpinLength / this.velocity;
 		},
 		_updateDirection: function(deltaS){
@@ -114,28 +106,35 @@ var createjs = this.createjs || {};
 				this._direction = this._toDirection;
 			}
 		},
-		_update: function(fps){
+		_update: function(){
 			// 蛇头
-			var self = this;
-				
 			this.head.x = this._coords.x;
 			this.head.y = this._coords.y;
 			this.head.rotation = this._direction;
-			
-			this._tail.forEach(function(elem, idx){
-				var index = Math.min(Math.round(idx * self.snakeBodySpan/(64/self.fps)), 
-									self._path.length);
-				var pos = self._path[index];
+			var idx = 0,
+				lag = Math.round(game.setting.snakeBodySpan/this.velocity/1000*this.fps),
+				cacheIndex = 0;
+				//console.log(lag, this.fps);
+			while(idx < this.snakeLength){
+				var index = (idx + 1)*lag + 1, 
+					cacheIndex = Math.max(0, this._path.length - index);
+					pos = this._path[cacheIndex]; 
+					elem = this._tail[idx];
 				if(pos){
 					elem.x = pos.x;
 					elem.y = pos.y;
 				}
-			});
+				idx++;
+			}
+			//console.log(cacheIndex);
+			if(cacheIndex > 0){
+				this._path.splice(0, cacheIndex-1);
+			}
 			//console.log(this._coords);
 		},
 		_initBody: function(){
 			
-			for(var i=0; i< this.snakeLength ;i++){
+			for(var i=this.snakeLength-1; i>-1  ;i--){
 				var body = new game.sprite.snake_tail()
 				this.ground.addChild(body);
 				this._tail.push(body);
@@ -173,13 +172,15 @@ var createjs = this.createjs || {};
 						var idx = game.utility.encode(Math.round(this.head.x +i), Math.round(this.head.y + j));
 						//console.log(idx)
 						if(game.playground.crumbs[idx]){
-							console.log(game.playground.ground.removeChild(game.playground.crumbs[idx]));
+							//console.log(game.playground.ground.removeChild(game.playground.crumbs[idx]));
+							game.playground.crumbs[idx].visible = false; // TODO 优化性能
 							game.playground.crumbs[idx] = undefined;
-							console.log("eat: "+idx);
+							//console.log("eat: "+idx);
 							this.storage++;
 							if(this.storage % game.setting.pointsToGrow == 0){
 								this._grow();
 							}
+							game.playground.supply();
 						}
 					//}
 				}
@@ -197,26 +198,67 @@ var createjs = this.createjs || {};
 				}
 				switch (event.key) {
 					case "ArrowDown":
-						console.log("down")
+						//console.log("down")
 						game.playground.player.turnTo(90);
 						break;
 					case "ArrowUp":
-						console.log("up")
+						//console.log("up")
 						game.playground.player.turnTo(270);
 						break;
 					case "ArrowLeft":
-						console.log("left")
+						//console.log("left")
 						game.playground.player.turnTo(180);
 						break;
 					case "ArrowRight":
-						console.log("right")
+						//console.log("right")
 						game.playground.player.turnTo(0);
 						break;
+
 					default:
 						return; // Quit when this doesn't handle the key event.
 				}
 			})
 		}
+	}
+}).call(this, game);
+;(function(){
+	game.touchHandler = {
+		init: function(){
+			game.touchHandlerDom.addEventListener("mousedown", function(event){
+				var x = event.pageX, 
+					y = event.pageY;
+				game.playground.player.turnTo(transCoord(x, y));
+			});
+			/*game.touchHandlerDom.addEventListener("mousemove", function(event){
+				var x = event.pageX, 
+					y = event.pageY;
+				transCoord(x, y);
+			});*/
+			game.touchHandlerDom.addEventListener("mouseup", function(event){
+				//backCoord();
+			});
+		},
+	}
+	function transCoord(x, y){
+		var deltaX = x - game.touchHandlerCenter.x,
+			deltaY = y - game.touchHandlerCenter.y,
+			theta = Math.atan(deltaY/deltaX);
+		theta = theta/Math.PI*180;
+		if(deltaX < 0){
+			theta += 180;
+		}else{
+			if(deltaY < 0){
+				theta = 360 + theta;
+			}
+		}
+		var left = 13 * Math.cos(theta/180*Math.PI),
+			top =  13 * Math.sin(theta/180*Math.PI);
+			//console.log(left, top);
+		game.touchHandlerBtn.style.transform = "translate("+left+"px,"+top+"px)";
+		return theta;
+	}
+	function backCoord(){
+		game.touchHandlerBtn.style.transform = "translate(0px,0px)";
 	}
 }).call(this, game);
 
@@ -233,7 +275,7 @@ var createjs = this.createjs || {};
 				height: game.setting.playgroundWidth
 			});
 			this._spreadCrumbs();
-			console.log(this.crumbs);
+			//console.log(this.crumbs);
 			game.stage.addChild(ground);
 
 			var player = this.player = new game.snake({
@@ -265,6 +307,18 @@ var createjs = this.createjs || {};
 					i--;
 				}
 			}
+		},
+		supply: function(){
+			do{
+				var x = Math.round(Math.random()*(game.setting.playgroundWidth-20)) + 10;
+				var y = Math.round(Math.random()*(game.setting.playgroundWidth-20)) + 10;
+				var code = game.utility.encode(x, y);
+			}while(this.crumbs[code]);
+			var sprite = new game.sprite.crumb();
+			sprite.x = x;
+			sprite.y = y;
+			this.ground.addChild(sprite);
+			this.crumbs[code] = sprite;
 		},
 		_spreadEnemys: function(){
 			for(var i=0;i<game.setting.enemyNum;i++){
@@ -325,6 +379,7 @@ var createjs = this.createjs || {};
 		cjs.Touch.enable(game.stage);
 		var initAll = function(){
 			game.keyHandler.init();
+			game.touchHandler.init();
 			game.playground.init();
 			game.gameView.init();
 		}

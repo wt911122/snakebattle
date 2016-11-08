@@ -33,6 +33,16 @@ var createjs = this.createjs || {};
 		this.addChild(circle);
 	}).prototype = Object.create(cjs.Container.prototype);
 
+	/*;(game.sprite.snake_candy = function(){
+		cjs.Container.call(this);
+		var circle = new cjs.Shape();
+		circle.graphics.beginFill("#0000FF").drawCircle(0, 0, 7);
+		circle.graphics.endFill();
+		circle.x = 0;
+		circle.y = 0;
+		this.addChild(circle);
+	}).prototype = Object.create(cjs.Container.prototype);*/
+
 	;(game.sprite.playground = function(bound){
 		cjs.Container.call(this);
 		var rect = new cjs.Shape();

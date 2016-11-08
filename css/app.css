@@ -1,0 +1,25 @@
+.leftSide{
+	position: absolute;
+	width: 50vw;
+	height: 100vh;
+	background: transparent;
+	top: 0;
+}
+.leftSide > .buttonWrapper{
+	position: absolute;
+	width: 50px;
+	height: 50px;
+	left: 25px;
+	bottom: 25px;
+	background-color: rgba(0,0,0,0.5);
+	border-radius: 100%;
+}
+.leftSide > .buttonWrapper > .MotionControler{
+	position: absolute;
+	width: 24px;
+	height: 24px;
+	margin: 13px;
+	background-color: rgba(0,0,0,0.8);
+	border-radius: 100%;
+	border: 0;
+}

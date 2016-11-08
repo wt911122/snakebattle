@@ -4,7 +4,16 @@ var createjs = this.createjs || {};
 ;(function(game){
 	game.PI2 = Math.PI*2;
 	game.canvas = document.getElementById('stage');
+	game.touchHandlerDom = document.getElementById('motionhandler');
+	game.touchHandlerBtn = game.touchHandlerDom.querySelector("button.MotionControler");
+	var	bt = game.touchHandlerBtn.getBoundingClientRect();
+	game.touchHandlerCenter = {
+		x: bt.left + bt.width/2,
+		y: bt.top + bt.height/2
+	}
+
 	game.utility.resizeCanvas();
+
 	game.setting = {
 		FPS: 40,
 
@@ -37,7 +46,7 @@ var createjs = this.createjs || {};
 		this.storage = 0;
 		this.head = new game.sprite.snake_head();
 		this.ground = ground;
-
+		this.iddead = false;
 		
 		this.snakeLength = length || game.setting.initialSnakelength;
 		this.setVelocity(game.setting.initialSnakeVelocity);
@@ -68,7 +77,7 @@ var createjs = this.createjs || {};
 			this._coords.y += deltaY;
 
 
-			this._path.push({x:this._coords.x, y: this._coords.y});
+			this._path.push({x:this._coords.x, y: this._coords.y, delta: deltamS});
 			this._updateDirection(deltamS);
 			this._update();
 			this.eatCrumbs();
@@ -81,11 +90,11 @@ var createjs = this.createjs || {};
 		turnTo: function(degree){
 			this._toDirection = degree;
 			var span = degree - this._direction;
-			if(span <= -180 || span >= 180){
+			if(span < -180 || span >= 180){
 				this.clockwise = (span> 0?-1:1);
 				this.anglespan = 360 - Math.abs(span);
 			}
-			if(span > -180 && span < 180){
+			if(span >= -180 && span < 180){
 				this.clockwise = (span> 0?1:-1);
 				this.anglespan = Math.abs(span);
 			}
@@ -116,36 +125,49 @@ var createjs = this.createjs || {};
 		},
 		_update: function(fps){
 			// 蛇头
-			var self = this;
-				
 			this.head.x = this._coords.x;
 			this.head.y = this._coords.y;
 			this.head.rotation = this._direction;
-			
-			this._tail.forEach(function(elem, idx){
-				var index = Math.min(Math.round(idx * self.snakeBodySpan/(64/self.fps)), 
-									self._path.length);
-				var pos = self._path[index];
+			var idx = 0;
+			// 蛇身
+			/*while(idx < this.snakeLength){
+				var index = Math.min(Math.round(idx * this.snakeBodySpan/(64/this.fps)), 
+									this._path.length);
+				var pos = this._path[index];
+				var elem = this._tail[idx];
 				if(pos){
 					elem.x = pos.x;
 					elem.y = pos.y;
 				}
-			});
+				idx++;
+			}*/
+		//	var lag = this.snakeBodySpan/(64/this.fps);
+			var lag = this.sn
+			while(idx < this.snakeLength){
+				var index = (idx + 1)*lag + 1; 
+				var pos = this._path[Math.max(0, this._path.length - index)]; 
+				var elem = this._tail[idx];
+				if(pos){
+					elem.x = pos.x;
+					elem.y = pos.y;
+				}
+				idx++;
+			}
 			//console.log(this._coords);
 		},
 		_initBody: function(){
 			
-			for(var i=0; i< this.snakeLength ;i++){
+			for(var i=this.snakeLength-1; i>-1  ;i--){
 				var body = new game.sprite.snake_tail()
 				this.ground.addChild(body);
-				this._tail.push(body);
+				this._tail.unshift(body);
 			}
 			this.ground.addChild(this.head);
 		},	
 		_grow: function(){
 			var body = new game.sprite.snake_tail();
 			this.ground.addChild(body);
-			this._tail.push(body);
+			this._tail.unshift(body);
 			this.snakeLength ++;
 			this.snakeCacheLength = this.snakeLength * this.snakeBodySpan;
 			//this.ground.setChildIndex(this.head, this.ground.children.length-1);
@@ -212,11 +234,52 @@ var createjs = this.createjs || {};
 						console.log("right")
 						game.playground.player.turnTo(0);
 						break;
+
 					default:
 						return; // Quit when this doesn't handle the key event.
 				}
 			})
 		}
+	}
+}).call(this, game);
+;(function(){
+	game.touchHandler = {
+		init: function(){
+			game.touchHandlerDom.addEventListener("mousedown", function(event){
+				var x = event.pageX, 
+					y = event.pageY;
+				game.playground.player.turnTo(transCoord(x, y));
+			});
+			/*game.touchHandlerDom.addEventListener("mousemove", function(event){
+				var x = event.pageX, 
+					y = event.pageY;
+				transCoord(x, y);
+			});*/
+			game.touchHandlerDom.addEventListener("mouseup", function(event){
+				//backCoord();
+			});
+		},
+	}
+	function transCoord(x, y){
+		var deltaX = x - game.touchHandlerCenter.x,
+			deltaY = y - game.touchHandlerCenter.y,
+			theta = Math.atan(deltaY/deltaX);
+		theta = theta/Math.PI*180;
+		if(deltaX < 0){
+			theta += 180;
+		}else{
+			if(deltaY < 0){
+				theta = 360 + theta;
+			}
+		}
+		var left = 13 * Math.cos(theta/180*Math.PI),
+			top =  13 * Math.sin(theta/180*Math.PI);
+			console.log(left, top);
+		game.touchHandlerBtn.style.transform = "translate("+left+"px,"+top+"px)";
+		return theta;
+	}
+	function backCoord(){
+		game.touchHandlerBtn.style.transform = "translate(0px,0px)";
 	}
 }).call(this, game);
 
@@ -325,6 +388,7 @@ var createjs = this.createjs || {};
 		cjs.Touch.enable(game.stage);
 		var initAll = function(){
 			game.keyHandler.init();
+			game.touchHandler.init();
 			game.playground.init();
 			game.gameView.init();
 		}
