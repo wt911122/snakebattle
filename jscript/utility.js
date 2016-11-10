@@ -4,7 +4,6 @@ var createjs = createjs || {};
 ;(function(game, cjs){
 	game.utility = game.helper || {};
 	game.utility.resizeCanvas = function(){
-		console.log(game.canvas);
 		game.canvas.width = window.innerWidth;
 		game.canvas.height = window.innerHeight;
 	};

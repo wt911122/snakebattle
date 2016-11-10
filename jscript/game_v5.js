@@ -15,13 +15,11 @@ var createjs = this.createjs || {};
 	game.utility.resizeCanvas();
 
 	game.setting = {
-		FPS: 40,
-
 		gameWidth: game.canvas.width,
 		gameHeight: game.canvas.height,
 
 		snakeRadius: 8,
-		snakeSpinLength: 0.175, 
+		snakeSpinLength: 0.2, 
 		snakeBodySpan: 16, 			// px
 		initialSnakeVelocity: 0.2, // px/ms  
 		initialSnakelength: 5,
@@ -145,7 +143,8 @@ var createjs = this.createjs || {};
 		_updateDirection: function(deltaS){
 			//console.log(game.utility.approximateCompare(this._direction, this._toDirection, 5))
 			if(this.anglespan > 0){
-				var step = this.clockwise * (deltaS/this.snakeSpinTime);
+				var step = Math.round(this.clockwise * (deltaS/this.snakeSpinTime));
+				//console.log(step);
 				this._direction += step
 				this.anglespan -= Math.abs(step);
 				//console.log(this._direction);
@@ -214,7 +213,7 @@ var createjs = this.createjs || {};
 			// 蛇头
 			this.head.x = this._coords.x;
 			this.head.y = this._coords.y;
-			this.head.rotation = this._direction;
+			this.head.rotation = this._toDirection;
 			var idx = 0,
 				lag = Math.round(game.setting.snakeBodySpan/this.velocity/1000*this.fps),
 				cacheIndex = 0;
@@ -332,29 +331,48 @@ var createjs = this.createjs || {};
 	}
 }).call(this, game);
 ;(function(){
+	var touchHandler = function(evt){
+		evt.stopPropagation();
+		evt.preventDefault();
+		if (evt.touches.length > 1 || (evt.type == "touchend" && evt.touches.length > 0))
+			return;
+		var touch = evt.changedTouches[0];
+		var x = touch.clientX, 
+			y = touch.clientY; 
+		game.playground.player.turnTo(transCoord(x, y));
+	}
 	game.touchHandler = {
 		init: function(){
-			game.touchHandlerDom.addEventListener("touchstart", function(event){
-				var x = event.pageX || event.clientX, 
-					y = event.pageY || event.clientY; 
+			game.touchHandlerDom.addEventListener("touchstart", touchHandler);
+			game.touchHandlerDom.addEventListener("touchmove", touchHandler);
+			game.touchHandlerDom.addEventListener("touchend", function(){
+				backCoord();
+			})
+		/*	game.touchHandlerDom.addEventListener("touchstart", function(e){
+				e.stopPropagation();
+				e.preventDefault();
+				var x = e.pageX || e.clientX, 
+					y = e.pageY || e.clientY; 
 				game.playground.player.turnTo(transCoord(x, y));
 			});
-			game.touchHandlerDom.addEventListener("touchmove", function(event){
-				var x = event.pageX || event.clientX, 
-					y = event.pageY || event.clientY;
+			game.touchHandlerDom.addEventListener("touchmove", function(e){
+				e.stopPropagation();
+				e.preventDefault();
+				var x = e.pageX || e.clientX, 
+					y = e.pageY || e.clientY;
 					//console.log(x, y);
 				game.playground.player.turnTo(transCoord(x, y));
 			});
 			game.touchHandlerDom.addEventListener("touchend", function(event){
 				//backCoord();
-			});
+			});*/
 		},
 	}
 	function transCoord(x, y){
 		var deltaX = x - game.touchHandlerCenter.x,
 			deltaY = y - game.touchHandlerCenter.y,
 			theta = Math.atan(deltaY/deltaX);
-		theta = theta/Math.PI*180;
+		theta = Math.round(theta/Math.PI*180);
 		if(deltaX < 0){
 			theta += 180;
 		}else{

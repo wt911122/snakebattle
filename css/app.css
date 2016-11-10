@@ -1,7 +1,16 @@
+*{
+	padding: 0;
+	margin: 0;
+}
+canvas{
+	overflow: hidden;
+	border: none;
+	box-sizing: border-box;
+}
 .leftSide{
 	position: absolute;
-	width: 50vw;
-	height: 100vh;
+	width: 50%;
+	height: 100%;
 	background: transparent;
 	top: 0;
 }
