@@ -6,11 +6,11 @@ var createjs = this.createjs || {};
 (function(game, cjs){
 	game.sprite = {};
 
-	;(game.sprite.snake_head = function(){
+	;(game.sprite.snake_head = function(color, radius){
 		cjs.Container.call(this);
 		var circle = new cjs.Shape();
 		circle.graphics.beginStroke('#000000');
-		circle.graphics.beginFill("#FF0000").drawCircle(0, 0, 10);
+		circle.graphics.beginFill(color).drawCircle(0, 0, radius||game.setting.snakeRadius);
 		circle.graphics.moveTo(0,0);
 		circle.graphics.lineTo(12, 0);
 		circle.graphics.endStroke();
@@ -21,12 +21,12 @@ var createjs = this.createjs || {};
 		this.addChild(circle);
 	}).prototype = Object.create(cjs.Container.prototype);
 
-	;(game.sprite.snake_tail = function(){
+	;(game.sprite.snake_tail = function(color, radius){
 		cjs.Container.call(this);
 		var circle = new cjs.Shape();
-		circle.graphics.beginStroke('#000000');
-		circle.graphics.beginFill("#0000FF").drawCircle(0, 0, 10);
-		circle.graphics.endStroke();
+		//circle.graphics.beginStroke('#000000');
+		circle.graphics.beginFill(color).drawCircle(0, 0, radius||game.setting.snakeRadius);
+		//circle.graphics.endStroke();
 		circle.graphics.endFill();
 		circle.x = 0;
 		circle.y = 0;
@@ -67,14 +67,14 @@ var createjs = this.createjs || {};
 		this.addChild(rect);
 	}).prototype = Object.create(cjs.Container.prototype);
 
-	;(game.sprite.crumb = function(){
+	;(game.sprite.crumb = function(color, radius){
 		cjs.Container.call(this);
 		var circle = new cjs.Shape();
 		var R = game.utility.getRandomHex(255),
 			G = game.utility.getRandomHex(255),
 			B = game.utility.getRandomHex(255);
-		var color = "#" + R + G + B;
-		circle.graphics.beginFill(color).drawCircle(0, 0, 5);
+		var color = color || "#" + R + G + B;
+		circle.graphics.beginFill(color).drawCircle(0, 0, radius||game.setting.crumbRadius);
 		circle.graphics.endStroke();
 		circle.x = 0;
 		circle.y = 0;

@@ -15,6 +15,12 @@ var createjs = createjs || {};
 	};
 	game.utility.getRandomHex = function(range){
 		return new Number(Math.round(Math.random()*range)).toString(16);
+	};
+	game.utility.getRandomColor = function(){
+		var R = game.utility.getRandomHex(255),
+			G = game.utility.getRandomHex(255),
+			B = game.utility.getRandomHex(255);
+		return "#" + R + G + B;
 	}
 	game.utility.encode = function(x, y){
 		return "_"+x+","+y;

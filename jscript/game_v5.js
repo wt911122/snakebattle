@@ -37,6 +37,8 @@ var createjs = this.createjs || {};
 
 
 ;(function(game){
+	var encode = game.utility.encode;
+	var ticker = createjs.Ticker;
 	game.snake = function(coords, ground, length, auto){
 		this._coords = coords;	
 		this._tail = [];
@@ -45,20 +47,21 @@ var createjs = this.createjs || {};
 		this.head = new game.sprite.snake_head();
 		this.ground = ground;
 		this.isDead = false;
-		
+		this._checkInterval = Math.round(Math.random(3));
+
 		this.snakeLength = length || game.setting.initialSnakelength;
 		this.setVelocity(game.setting.initialSnakeVelocity);
 
 		this._direction = Math.random()*360;
 		this._toDirection = this._direction;
 		this._initBody();
+
 		if(auto){
 			this.auto = true;
 			this.autoChangeTime = Math.random(200) + 500;
 		}
 	}
-	var counter = 0;
-	var counter2 = 0;
+
 	game.snake.prototype = {
 		tick: function(deltamS){
 			if(this.isDead) return
@@ -67,12 +70,8 @@ var createjs = this.createjs || {};
 				span = this.velocity * deltamS,
 				deltaX = span * Math.cos(toRadian(this._direction)),
 				deltaY = span * Math.sin(toRadian(this._direction));
-			if(counter === 0){
-				this.fps = createjs.Ticker.getMeasuredFPS();
-			}
-			counter += deltamS;
-			if(counter > 200){
-				counter = 0;
+			if(ticker.getTicks() % 10 === 0 ){
+				this.fps = ticker.getMeasuredFPS();
 			}
 				
 				//console.log(deltaX, deltaY);
@@ -83,9 +82,14 @@ var createjs = this.createjs || {};
 			this._path.push({x:this._coords.x, y: this._coords.y, delta: deltamS});
 			this._updateDirection(deltamS);
 			this._update();
-			this._checkCrash();
-			this._checkEdge();
-			this.eatCrumbs();
+
+			if((ticker.getTicks()+this._checkInterval) % 4 === 0){
+				this._checkCrash();
+				this._checkEdge();
+				this.eatCrumbs();
+			}
+
+			
 			//console.log(this.auto);
 			if(this.auto){
 				this._detectEdge();
@@ -93,6 +97,8 @@ var createjs = this.createjs || {};
 			}
 		},
 		turnTo: function(degree){
+			var dir = (degree + 360)%360;
+			if(Math.abs(dir - this._direction) < 3) return;
 			this._toDirection = (degree + 360)%360;
 			var span = degree - this._direction;
 			if(span < -180 || span >= 180){
@@ -114,12 +120,9 @@ var createjs = this.createjs || {};
 			}
 		},
 		_autoTurn: function(deltamS){
-			if(counter2 === 0){
+			if(ticker.getTicks() %  100 === 0){
 				this.turnTo(Math.random()*60 - 30 + this._toDirection);
 			}
-			counter2 += deltamS
-			if(counter2 > this.autoChangeTime)
-				counter2 = 0;
 		},
 		_detectEdge: function(){
 			//console.log("ai")
@@ -198,13 +201,14 @@ var createjs = this.createjs || {};
 			}
 		},
 		_desolve: function(){
+			var crumbs = game.playground.crumbs;
 			this.head.visible = false;
 			//var code = game.utility.encode(Math.round(this.head.x), Math.round(this.head.y));
 			this._tail.forEach(function(item, idx){
 				item.scaleX = item.scaleY = 0.6;
 				item.score = 3;
-				code = game.utility.encode(Math.round(item.x), Math.round(item.y));
-				game.playground.crumbs[code] = item;
+				code = encode(Math.round(item.x), Math.round(item.y));
+				crumbs[code] = item;
 				//console.log(code)
 			});
 			
@@ -257,8 +261,11 @@ var createjs = this.createjs || {};
 			//this.setVelocity();
 		},
 		eatCrumbs: function(){
-			var range = 14,
-				inrange = 0;
+			var range = 10,
+				inrange = 0,
+				crumbs = game.playground.crumbs,
+				l = crumbs.length,
+				item;
 			/*//扇形吃
 			for(var r = 8; r < range; r++){
 				for(var theta = this.head.rotation-60; theta<this.head.rotation+60; theta += 5){
@@ -272,24 +279,26 @@ var createjs = this.createjs || {};
 				}	
 			}*/
 			//矩形吃
+
 			for(var i = -range ;i <= range; i++){
 				for(var j = -range ;j <= range; j++){
 					//if((i < -inrange || i > inrange) && ((j < -inrange || j > inrange))){
-						var idx = game.utility.encode(Math.round(this.head.x +i), Math.round(this.head.y + j));
+						var idx = encode(Math.round(this.head.x +i), Math.round(this.head.y + j));
 						//console.log(idx)
-						if(game.playground.crumbs[idx]){
+						if(crumbs[idx]){
 							//console.log(game.playground.ground.removeChild(game.playground.crumbs[idx]));
-							var score = game.playground.crumbs[idx].score;
-							game.playground.crumbs[idx].visible = false; // TODO 优化性能
-							game.playground.crumbs[idx] = undefined;
+							var score = crumbs[idx].score;
+							crumbs[idx].visible = false; // TODO 优化性能
+							crumbs[idx] = undefined;
 							///console.log("eat: "+idx, score);
 							this.storage += score;
-							while(Math.floor(this.storage / game.setting.pointsToGrow) > this._tail.length - game.setting.initialSnakelength){
+							/*while(Math.floor(this.storage / game.setting.pointsToGrow) > this._tail.length - game.setting.initialSnakelength){
 								//console.log("grow");
 								this._grow();
-							}
-							if(score === 1)
-								game.playground.supply();
+							}*/
+							//if(score === 1)
+								//game.playground.supply();
+							return;
 						}
 					//}
 				}
@@ -330,6 +339,7 @@ var createjs = this.createjs || {};
 		}
 	}
 }).call(this, game);
+
 ;(function(){
 	var touchHandler = function(evt){
 		evt.stopPropagation();
@@ -347,25 +357,7 @@ var createjs = this.createjs || {};
 			game.touchHandlerDom.addEventListener("touchmove", touchHandler);
 			game.touchHandlerDom.addEventListener("touchend", function(){
 				backCoord();
-			})
-		/*	game.touchHandlerDom.addEventListener("touchstart", function(e){
-				e.stopPropagation();
-				e.preventDefault();
-				var x = e.pageX || e.clientX, 
-					y = e.pageY || e.clientY; 
-				game.playground.player.turnTo(transCoord(x, y));
 			});
-			game.touchHandlerDom.addEventListener("touchmove", function(e){
-				e.stopPropagation();
-				e.preventDefault();
-				var x = e.pageX || e.clientX, 
-					y = e.pageY || e.clientY;
-					//console.log(x, y);
-				game.playground.player.turnTo(transCoord(x, y));
-			});
-			game.touchHandlerDom.addEventListener("touchend", function(event){
-				//backCoord();
-			});*/
 		},
 	}
 	function transCoord(x, y){
@@ -423,9 +415,9 @@ var createjs = this.createjs || {};
 
 		_spreadCrumbs: function(){
 			for(var i=0;i<game.setting.crumbsNum;i++){
-				var x = Math.round(Math.random()*(game.setting.playgroundWidth-20)) + 10;
-				var y = Math.round(Math.random()*(game.setting.playgroundWidth-20)) + 10;
-				var code = game.utility.encode(x, y);
+				var x = Math.round(Math.random()*(game.setting.playgroundWidth-20)) + 10,
+					y = Math.round(Math.random()*(game.setting.playgroundWidth-20)) + 10,
+					code = game.utility.encode(x, y);
 				if(!this.crumbs[code]){
 					var sprite = new game.sprite.crumb();
 					sprite.x = x;
@@ -439,7 +431,8 @@ var createjs = this.createjs || {};
 			}
 		},
 		supply: function(){
-			do{
+
+			/*do{
 				var x = Math.round(Math.random()*(game.setting.playgroundWidth-20)) + 10;
 				var y = Math.round(Math.random()*(game.setting.playgroundWidth-20)) + 10;
 				var code = game.utility.encode(x, y);
@@ -449,7 +442,15 @@ var createjs = this.createjs || {};
 			sprite.y = y;
 			this.ground.addChild(sprite);
 			sprite.score = 1;
-			this.crumbs[code] = sprite;
+			this.crumbs[code] = sprite;*/
+			/*var x = Math.round(Math.random()*(game.setting.playgroundWidth-20)) + 10,
+				y = Math.round(Math.random()*(game.setting.playgroundWidth-20)) + 10,
+				code = game.utility.encode(x, y),
+				item;
+			if(item = this.crumbs[code]){
+				item.visible = true;
+			}*/
+
 		},
 		_spreadEnemys: function(){
 			for(var i=0;i<game.setting.enemyNum;i++){
