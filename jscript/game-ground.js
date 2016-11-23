@@ -2,10 +2,12 @@ var createjs = this.createjs || {};
 var game = this.game || {};
 
 ;(function(game, cjs){
+	var quirkrefresher = game.setting.quirkModeRefresher;
 	game.playground = {
 		snakes: [],
 		network: [],
 		crashedSnakePieces: [],
+		quirkCrumbs: [],
 		init: function(){
 			this.initGround();
 			this.initNetWork();
@@ -109,7 +111,7 @@ var game = this.game || {};
 					ground: this.ground,
 					length: Math.round(Math.random() * 5) + 5,
 					auto: {
-						autoChangeTime: Math.round(Math.random(50)) + 100
+						autoChangeTime: Math.round(Math.random(50)) + 50
 					}
 				});
 				this.snakes.push(snake);
@@ -138,6 +140,18 @@ var game = this.game || {};
 				em.tick(deltaS);
 			});
 		},
+		_quirkCrumbsTicks: function(){
+
+			var ts = cjs.Ticker.getTicks(), crumb;
+			if(ts % quirkrefresher == 0){
+				console.log("quirkCrumbs");
+				crumb = game.quirkCrumbsFactory.generate();
+				crumb.x = crumb.sprite.x = Math.random()*(game.setting.playgroundWidth-20) + 10; 
+				crumb.y = crumb.sprite.y = Math.random()*(game.setting.playgroundWidth-20) + 10;
+				this.ground.addChild(crumb.sprite);
+				this.quirkCrumbs.push(crumb);
+			}
+		},
 		tick: function(event){
 			if(!cjs.Ticker.paused){
 				//console.log();
@@ -145,6 +159,7 @@ var game = this.game || {};
 				//this.ticker = cjs.Ticker.getTicks();
 				this._snakeTicks(event.delta);
 				this._changePixel();
+				this._quirkCrumbsTicks();
 			//	this.ground.updateCache();
 			}
 		}

@@ -67,7 +67,7 @@ var createjs = this.createjs || {};
 		this.addChild(rect);
 	}).prototype = Object.create(cjs.Container.prototype);
 
-	;(game.sprite.crumb = function(color, radius){
+	;(game.sprite.crumb = function(color, radius, strokeColor){
 		cjs.Container.call(this);
 		var circle = new cjs.Shape();
 		var R = game.utility.getRandomHex(255),
@@ -75,7 +75,12 @@ var createjs = this.createjs || {};
 			B = game.utility.getRandomHex(255);
 		var color = color || "#" + R + G + B;
 		circle.graphics.beginFill(color).drawCircle(0, 0, radius||game.setting.crumbRadius);
-		circle.graphics.endStroke();
+		if(strokeColor){
+			circle.graphics.beginStroke(strokeColor);
+			circle.graphics.drawCircle(0, 0, radius||game.setting.crumbRadius);
+			circle.graphics.endStroke();
+		}
+		
 		circle.x = 0;
 		circle.y = 0;
 		this.addChild(circle);

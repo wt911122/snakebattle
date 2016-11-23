@@ -14,7 +14,15 @@ canvas{
 	background: transparent;
 	top: 0;
 }
-.leftSide > .buttonWrapper{
+.rightSide{
+	position: absolute;
+	width: 50%;
+	height: 100%;
+	left: 50%;
+	background: transparent;
+	top: 0;
+}
+.buttonWrapper{
 	position: absolute;
 	width: 50px;
 	height: 50px;
@@ -23,7 +31,7 @@ canvas{
 	background-color: rgba(0,0,0,0.5);
 	border-radius: 100%;
 }
-.leftSide > .buttonWrapper > .MotionControler{
+.MotionControler{
 	position: absolute;
 	width: 24px;
 	height: 24px;
@@ -31,4 +39,17 @@ canvas{
 	background-color: rgba(0,0,0,0.8);
 	border-radius: 100%;
 	border: 0;
+}
+.rightSide > .buttonWrapper{
+	right: 25px;
+	left: auto;
+}
+.rightSide.active > .buttonWrapper{
+	background-color: rgba(0,0,0,0.3);
+}
+.lightning {
+	background-image: url(lightning.png);
+	background-size: auto 32px;
+	background-position: center center;
+	background-repeat: no-repeat;
 }

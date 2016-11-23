@@ -4,6 +4,7 @@ var game = this.game || {};
 	game.PI2 = Math.PI*2;
 	game.canvas = document.getElementById('stage');
 	game.touchHandlerDom = document.getElementById('motionhandler');
+	game.velocityHandleDom = document.getElementById('velocityHandler');
 	game.touchHandlerBtn = game.touchHandlerDom.querySelector("button.MotionControler");
 	var	bt = game.touchHandlerBtn.getBoundingClientRect();
 	game.touchHandlerCenter = {
@@ -19,22 +20,25 @@ var game = this.game || {};
 		
 		netWidth: 10,
 		detectRange: 2,
-		crumbRefresh: 1000,
+		crumbRefresh: 3000,
 		crumbRadius: 5,
 
 		snakeRadius: 8,
 		snakeSpinLength: 0.3, 
 		snakeBodySpan: 16, 			// px
-		initialSnakeVelocity: 0.16, // px/ms  
+		initialSnakeVelocity: 0.16, // px/ms 
+		advancedSnakeVelocity: 0.22, 
 		initialSnakelength: 5,
-		pointsToGrow: 1,
+		pointsToGrow: 3,
 
-		playgroundWidth: 1000,
-		crumbsNum: 50,
-		enemyNum: 2,
+		playgroundWidth: 2000,
+		crumbsNum: 200,
+		enemyNum: 5,
 
 		AIDangerBounding: 30,
 		AIComfortBounding: 100,
+
+		quirkModeRefresher: 1000,
 
 	}
 }).call(this, game);

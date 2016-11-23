@@ -38,12 +38,33 @@ var createjs = this.createjs || {};
 	var touchHandler = function(evt){
 		evt.stopPropagation();
 		evt.preventDefault();
-		if (evt.touches.length > 1 || (evt.type == "touchend" && evt.touches.length > 0))
+		console.log(evt.touches.length)
+		if (evt.touches.length > 2 || (evt.type == "touchend" && evt.touches.length > 0))
 			return;
-		var touch = evt.changedTouches[0];
-		var x = touch.clientX, 
-			y = touch.clientY; 
-		game.playground.player.turnTo(transCoord(x, y));
+		if (evt.touches.length == 1){
+			var touch = evt.changedTouches[0];
+			var x = touch.clientX, 
+				y = touch.clientY;
+		}else{
+			var touch1 = evt.changedTouches[0],
+				touch2 = evt.changedTouches[0];
+			var x1 = touch1.clientX, 
+				y1 = touch1.clientY,
+				x2 = touch2.clientX,
+				y2 = touch2.clientY;
+			var x = x1>x2?x2:x1,
+			 	y = x1>x2?y2:y1;
+		}	
+		game.playground.player.DIRECTION = transCoord(x, y);
+	}
+	var velocityHandler = function(evt){
+		evt.stopPropagation();
+		evt.preventDefault();
+		console.log(evt.touches.length)
+		if (evt.touches.length > 2 || (evt.type == "touchend" && evt.touches.length > 0))
+			return;
+		game.velocityHandleDom.classList.add("active");
+		game.playground.player.VELOCITY = game.setting.advancedSnakeVelocity;
 	}
 	game.touchHandler = {
 		init: function(){
@@ -51,6 +72,12 @@ var createjs = this.createjs || {};
 			game.touchHandlerDom.addEventListener("touchmove", touchHandler);
 			game.touchHandlerDom.addEventListener("touchend", function(){
 				backCoord();
+			});
+
+			game.velocityHandleDom.addEventListener("touchstart", velocityHandler);
+			game.velocityHandleDom.addEventListener("touchend", function(){
+				game.playground.player.VELOCITY = game.setting.initialSnakeVelocity;
+				game.velocityHandleDom.classList.remove("active");
 			});
 		},
 	}
@@ -100,7 +127,7 @@ var createjs = this.createjs || {};
 			game.keyHandler.init();
 			game.touchHandler.init();
 			game.playground.init();
-			//game.gameView.init();
+			game.gameView.init();
 		}
 		initAll();
 	}
