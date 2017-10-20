@@ -1,11 +1,37 @@
 {
   "name": "snakebattle",
   "version": "1.0.0",
-  "description": "HTML5 version snake battle",
-  "main": "index.js",
+  "description": "",
+  "main": "compile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "browser": {
+    "easeljs": "./jslib/easeljs-0.8.2.min.js",
+    "tweenjs": "./jslib/tweenjs-0.6.2.min.js"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "browserify-shim": {
+    "easeljs": "createjs",
+    "tweenjs": {
+      "depends": [
+        "easeljs"
+      ]
+    }
+  },
+  "dependencies": {
+    "express": "^4.14.0",
+    "victor": "^1.1.0"
+  },
+  "devDependencies": {
+    "babel-polyfill": "^6.16.0",
+    "babelify": "^7.3.0",
+    "browserify-shim": "^3.8.12"
+  }
 }

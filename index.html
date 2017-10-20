@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>snake battle</title>
+	<title>SnakeBattle</title>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimal-ui" />
-	<meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="format-detection" content="telphone=no, email=no" />
 	<link rel="stylesheet" type="text/css" href="css/normalize.css">
 	<link rel="stylesheet" type="text/css" href="css/app.css">
-</head>
-<style type="text/css">
-	*{
-		box-sizing: border-box;
-	}
+	<style type="text/css">
+		#stage{
+			box-sizing: border-box;
+		}
 </style>
+</head>
 <body>
-<canvas id="stage" width="500px" height="500px">
-	
-</canvas>
+<canvas class="cover" id="stage"></canvas>
+<div id="infobox">
+	<h1>FPS: <span id="fps-rate"></span></h1>
+	<h1 id="time-remain"></h1>
+</div>
 <div id="motionhandler" class="leftSide">
 	<div class="buttonWrapper">
 		<button class="MotionControler"></button>
@@ -27,14 +31,29 @@
 	<div class="buttonWrapper lightning">
 	</div>
 </div>
-<script type="text/javascript" src="jslib/easeljs-0.8.2.combined.js"></script>
-<script type="text/javascript" src="jslib/tweenjs-0.6.2.min.js"></script>
-<script type="text/javascript" src="jscript/utility.js"></script>
-<script type="text/javascript" src="jscript/game-sprites.js"></script>
-<script type="text/javascript" src="jscript/game-setting.js"></script>
-<script type="text/javascript" src="jscript/game-crumbs-factory.js"></script>
-<script type="text/javascript" src="jscript/game-ground.js"></script>
-<script type="text/javascript" src="jscript/game-snake-v2.js"></script>
-<script type="text/javascript" src="jscript/game_v6.js"></script>
+<ul id="snake_list">
+</ul>
+<div class="cover end-scene" id="game-end-scene">
+	<div class="report-board">
+		<div class="report-title">游戏结束</div>
+		<div class="report-content">
+			<table>
+				<tr>
+					<td>长度</td>
+					<td id="snake-length" class="number">333</td>
+				</tr>
+				<tr>
+					<td>击杀</td>
+					<td id="snake-kill" class="number">0</td>
+				</tr>
+			</table>
+		</div>
+		<div class="option-panel">
+			<button class="panel-btn backward" id="backward-btn">返回</button>
+			<button class="panel-btn repeat" id="repeat-btn">重来</button>
+		</div>
+	</div>
+</div>
+<script type="text/javascript" src="bundle.js"></script>
 </body>
 </html>

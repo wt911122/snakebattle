@@ -2,10 +2,21 @@
 	padding: 0;
 	margin: 0;
 }
+html, body{
+	width: 100%;
+	height: 100%;
+}
+.cover{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+}
 canvas{
 	overflow: hidden;
 	border: none;
 	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
 }
 .leftSide{
 	position: absolute;
@@ -24,32 +35,130 @@ canvas{
 }
 .buttonWrapper{
 	position: absolute;
-	width: 50px;
-	height: 50px;
-	left: 25px;
-	bottom: 25px;
+	width: 86px;
+	height: 86px;
+	left: 40px;
+	bottom: 40px;
 	background-color: rgba(0,0,0,0.5);
 	border-radius: 100%;
 }
 .MotionControler{
 	position: absolute;
-	width: 24px;
-	height: 24px;
-	margin: 13px;
-	background-color: rgba(0,0,0,0.8);
+    width: 36px;
+    height: 36px;
+    margin: 25px;
 	border-radius: 100%;
 	border: 0;
+	background-color: #fff;
 }
 .rightSide > .buttonWrapper{
-	right: 25px;
+	right: 40px;
 	left: auto;
 }
 .rightSide.active > .buttonWrapper{
-	background-color: rgba(0,0,0,0.3);
+	background-color: rgba(0,0,0,0.5);
 }
 .lightning {
+	background-color: rgba(0, 0, 0, 0.3);
 	background-image: url(lightning.png);
-	background-size: auto 32px;
+	background-size: auto 50px;
 	background-position: center center;
 	background-repeat: no-repeat;
+}
+#infobox{
+	position: absolute;
+	left: 0;
+	top: 0;
+	padding: 20px;
+}
+#infobox > h1{
+	font-size: 8px;
+}
+
+#snake_list{
+	position: absolute;
+	top: 0;
+	right: 0;
+	padding: 10px;
+	width: 150px;
+	line-height: 1.5em;
+	font-size: 8px;
+	list-style-type: none;
+	background-color: rgba(0,0,0,0.15);
+	border-radius: 5px;
+	border: 1px solid rgba(0,0,0,0.4);
+}
+#snake_list > li{
+	display: flex;
+	justify-content: space-between;
+}
+.end-scene{
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	display: none;
+}
+.report-board{
+	width: 250px;
+	height: 140px;
+	background-color: #fff;
+	text-align: center;
+	border-radius: 5px;
+	margin-top: -30px;
+	font-size: 16px;
+}
+.report-board > .report-title{
+	width: 180px;
+	line-height: 2em;
+	position: relative;
+	left: 35px;
+	top: -1em;
+	background-color: #EB3F2F;
+	color: #fff;
+	border-radius: 5px;
+}
+.report-board > .report-content{
+	height: 120px;
+}
+.report-content > table{
+	width: 70%;
+	margin-left: 15%;
+	margin-right: 15%;
+	margin-bottom: 15px;
+	line-height: 2em;
+}
+.number{
+	font-size: 1.2em;
+	color: #EB3F2F;
+}
+.report-board > .option-panel{
+	width: 100%;
+	height: 60px;
+	background:transparent;
+	display: flex;
+	justify-content: space-around;
+	position: relative;
+
+}
+.report-board > .option-panel > .panel-btn{
+	width: 50px;
+	height: 50px;
+	border-radius: 100%;
+	background-size: auto 30px;
+	background-position: center center;
+	background-repeat: no-repeat;
+	border: none;
+	line-height: 130px;
+	font-size: 0.8em;
+}
+.panel-btn.backward{
+	background-color: #32CD32;
+	background-image: url(./backward.svg);
+	color: #32CD32;
+}
+.panel-btn.repeat{
+	background-color: #FAC000;
+	background-image: url(./repeat.svg);
+	color: #FAC000;
 }

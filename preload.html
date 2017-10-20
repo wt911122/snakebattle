@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SnakeBattle</title>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="format-detection" content="telphone=no, email=no" />
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="css/app.css">
+	<link rel="stylesheet" type="text/css" href="css/pregame.css">
+
+</head>
+<body class="wrapper">
+	<div class="head-part">
+		<div class="content-float-layout">
+			<div class="user-info">
+				<img src="./css/head.png" />
+				<span>player</span>
+			</div>
+		</div>
+	</div>
+	<div class="main-part">
+		<div class="content-flex-layout">
+			<a id="normal-mode" class="start-btn" href="index.html?mode=normal">
+				标准模式
+			</a>
+			<a id="time-mode" class="start-btn" href="index.html?mode=time">
+				限时模式
+			</a>
+		</div>
+	</div>
+	<div class="foot-part">
+		<div></div>
+	</div>
+	<script type="text/javascript">
+	function browserRedirect() {
+		var sUserAgent = navigator.userAgent.toLowerCase();
+		var bIsIpad = sUserAgent.match(/ipad/i) == "ipad";
+		var bIsIphoneOs = sUserAgent.match(/iphone os/i) == "iphone os";
+		var bIsMidp = sUserAgent.match(/midp/i) == "midp";
+		var bIsUc7 = sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4";
+		var bIsUc = sUserAgent.match(/ucweb/i) == "ucweb";
+		var bIsAndroid = sUserAgent.match(/android/i) == "android";
+		var bIsCE = sUserAgent.match(/windows ce/i) == "windows ce";
+		var bIsWM = sUserAgent.match(/windows mobile/i) == "windows mobile";
+		if (bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM) {
+			return "mobile"
+		} else {
+			return "pc"
+		}
+	}
+	function wrapperA(domA){
+		var mode = browserRedirect();
+		if(mode === "mobile"){
+			domA.addEventListener("click", function(e){
+				e.preventDefault();
+				e.stopPropagation();
+			});
+			setTimeout(function(){
+				domA.addEventListener("touchend", function(){
+					window.location.href = domA.href;
+				});
+			}, 500);
+		}
+		if(mode === "pc"){
+			domA.addEventListener("click", function(e){
+				e.preventDefault();
+				e.stopPropagation();
+				window.location.href = domA.href;
+			});
+		}
+
+	}
+	let a1 = document.getElementById("normal-mode");
+	let a2 = document.getElementById("time-mode");
+	wrapperA(a1);
+	wrapperA(a2);
+	</script>
+	<!--<a href="./index.html">start</a>-->
+</body>
